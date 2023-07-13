@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 from flask_socketio import SocketIO, emit
 from threading import Lock
 from datetime import datetime
@@ -6,8 +6,8 @@ from datetime import datetime
 """
 Background Thread
 """
-thread = None
-thread_lock = Lock()
+# thread = None
+# thread_lock = Lock()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'q23sa'
@@ -57,6 +57,13 @@ def index():
     return response
 
 
+@app.route('/list_rooms')
+def list_rooms():
+    response = {'rooms': rooms}
+    print(response)
+    return response
+
+
 """
 Decorator for connect
 """
@@ -66,30 +73,52 @@ Decorator for connect
 def connect():
     user = User(request.sid)
     users.append(user)
-    print('Client connected')
-    print(f'All users {len(users)}')
+    # print('Client connected')
+    # print(f'All users {len(users)}')
 
 
 @socketio.on('create')
 def create(data):
-    print(data)
+    # print(data)
     room = Room(data['name'], request.sid, data['players'])
+    name = data['name']
+    # rooms[name] = room
+    rooms.append({'name': data['name'], 'id': request.sid, 'players': data['players']})
     room.start()
-    rooms.append(room)
-    print(room)
-    emit('create', {'stage': 'await'})
+    print(rooms)
+    # for i in rooms:
+    #     print(i)
+    # print([{'name': p.name, 'id': p.id} for i, p in rooms])
+    # rooms.append({'name': room.name, 'id': room.id})
+    # print('HOOLKAA')
+    # emit('get_list_rooms', {'rooms': rooms})
+    # print(rooms)
+    socketio.emit('create', {'rooms': rooms})
+    socketio.emit('get_list_rooms', {'rooms': rooms})
 
 
 @socketio.on('get_list_rooms')
-def get_list_rooms(name):
-    print([r.name for r in rooms])
-    emit("get_list_rooms", {"rooms": [r.name for r in rooms]})
+def get_list_rooms():
+    # print(rooms)
+    response = {'rooms': rooms}
+    socketio.emit("get_list_rooms", response)
 
 
 @socketio.on('set_name')
 def set_name(name):
     print(f'name - {name}')
     print(f'request.sid - {request.sid}')
+
+
+"""
+Game stages
+"""
+
+
+@socketio.on('game_stage_1')
+def game_stage_1():
+    response = {'rooms': rooms}
+    emit("get_list_rooms", response)
 
 
 """
@@ -122,4 +151,4 @@ def add_cors_headers(response):
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, debug=True, host='127.0.0.1')
