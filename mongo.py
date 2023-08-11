@@ -4,7 +4,10 @@ from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017/')
 
 # выбираем базу данных
-db = client['content_site']
+db = client['fun']
 
 # выбираем коллекцию пользователей
 users_collection = db['users']
+
+# выбираем коллекцию комнат
+rooms_collection = db['rooms']

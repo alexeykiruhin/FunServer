@@ -15,7 +15,7 @@ def game():
 
     # добавить проверку токена, если юзер вышел то нужно запретить отправку нового статуса
 
-    data = request.json
+    data = request.data
     print(data)
 
     response = {'Connect': True}
