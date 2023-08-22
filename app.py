@@ -1,13 +1,10 @@
-from flask import Flask, request, make_response
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask import Flask, request
 from flask_socketio import SocketIO, emit
-from threading import Lock
 from datetime import datetime
 from api import api
 from api.views.game import api_game
 from api.views.login import api_login
 from api.views.refresh import api_refresh
-from api.views.sockets import socket_bp
 import jwt
 from bson import ObjectId
 
@@ -46,33 +43,33 @@ app.config['JWT_REFRESH_COOKIE_NAME'] = 'token'
 # jwt = JWTManager(app)  # инициализируем объект JWTManager
 
 
-class Room:
-    def __init__(self, name, id, max_users):
-        self.name = name
-        self.id = len(rooms) + 1
-        self.users = []
-        self.max_users = max_users
-        self.add_user(id)
-        self.stage = 0
+# class Room:
+#     def __init__(self, name, id, max_users):
+#         self.name = name
+#         self.id = len(rooms) + 1
+#         self.users = []
+#         self.max_users = max_users
+#         self.add_user(id)
+#         self.stage = 0
+#
+#     def __str__(self):
+#         return f'Room: name - {self.name}, id - {self.id}, max_users - {self.max_users}, stage - {self.stage}'
+#
+#     def add_user(self, id):
+#         self.users.append(id)
+#
+#     def start(self):
+#         if len(self.users) < self.max_users:
+#             print('malo')
 
-    def __str__(self):
-        return f'Room: name - {self.name}, id - {self.id}, max_users - {self.max_users}, stage - {self.stage}'
 
-    def add_user(self, id):
-        self.users.append(id)
-
-    def start(self):
-        if len(self.users) < self.max_users:
-            print('malo')
-
-
-class User:
-    def __init__(self, sid):
-        self.name = 'Default_Name'
-        self.sid = sid
-
-    def set_name(self, name):
-        self.name = name
+# class User:
+#     def __init__(self, sid):
+#         self.name = 'Default_Name'
+#         self.sid = sid
+#
+#     def set_name(self, name):
+#         self.name = name
 
 
 """
@@ -189,7 +186,7 @@ def connect():
         print(user_names[0]['name'])
         print([un['username'] for un in user_names[0]['pl']])
         players = [un['username'] for un in user_names[0]['pl']]
-        name = user_names[0]['name']
+        # name = user_names[0]['name']
         # connectPlayers = ['vasja', 'kolja']
         socketio.emit('await_players', {'users': players}, room=request.sid)
         # нужно тут при релоадинге еще отправить название комнаты
@@ -201,8 +198,8 @@ def create(data):
     # print(data)
     user_identity = token_to_id()['identity']
     print(f'user_identity - {user_identity}')
-    room = Room(data['name'], user_identity, data['players'])
-    print(f'room - {room}')
+    # room = Room(data['name'], user_identity, data['players'])
+    # print(f'room - {room}')
 
     # Записываем в переменную стадию для юзера
     stage = 'game_stage_1'
@@ -276,7 +273,7 @@ def exit_room():
 
 @socketio.on('connect_room')  # коннект к комнате после её создания
 def connect():
-    token = request.args.get('token')
+    # token = request.args.get('token')
     print(f'connect_room - {request}')
     socketio.emit('connect_room', {'rooms': rooms})
 
