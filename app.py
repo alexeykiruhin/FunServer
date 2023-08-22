@@ -287,8 +287,10 @@ def get_list_rooms():
     print(f'user_identity - {user_identity}')
     if user_identity:
         # Ваша логика обработки, основанная на идентификаторе пользователя (user_identity)
-        response = {'rooms': rooms}
-        emit('get_list_rooms', response)
+        response = rooms_collection.find({}, {'_id': 1, 'name': 1})
+        out = [{'id': str(r['_id']), 'name': r['name']} for r in response]
+        print(f'out - {out}')
+        emit('get_list_rooms', out)
     else:
         # Если токен недействителен или отсутствует, отправьте соответствующее сообщение или выполните необходимые
         # действия
